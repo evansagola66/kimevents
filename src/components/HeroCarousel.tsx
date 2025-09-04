@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import BookingModal from "./BookingModal";
 
 interface HeroCarouselProps {
   images?: string[];
@@ -28,6 +29,7 @@ const HeroCarousel = ({
   interval = 5000,
 }: HeroCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -75,6 +77,7 @@ const HeroCarousel = ({
             <Button
               size="lg"
               className="bg-primary hover:bg-primary/90 text-white px-8 py-6"
+              onClick={() => setIsBookingModalOpen(true)}
             >
               Book Now
             </Button>
@@ -109,6 +112,12 @@ const HeroCarousel = ({
           />
         ))}
       </div>
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+      />
     </div>
   );
 };

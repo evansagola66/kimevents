@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import HeroCarousel from "./HeroCarousel";
-import ServiceSection from "./ServiceSection";
+import ServiceCard from "./ServiceSection";
 import ContactSection from "./ContactSection";
+import BookingModal from "./BookingModal";
+import ScrollToTop from "./ScrollToTop";
 
 const services = [
   {
@@ -10,8 +12,7 @@ const services = [
     title: "Tent Hire",
     description:
       "We offer a variety of tents including stretch tents, dome tents, high-peak tents, canopies, and gazebos for weddings, funerals, corporate events, and social gatherings.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=80",
+    imageUrl: "/tent-hiring-services.jpg",
     link: "#tent-hire",
   },
   {
@@ -46,8 +47,7 @@ const services = [
     title: "Generator Hire",
     description:
       "Ensure uninterrupted power with our backup generators for lighting, sound, and catering equipment at your events.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1624926571839-8a923c701aae?w=800&q=80",
+    imageUrl: "/generator-hire.jpg",
     link: "#generator-hire",
   },
   {
@@ -82,6 +82,7 @@ const services = [
 const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,14 +93,37 @@ const Home = () => {
       }
     };
 
+    const handleOpenBookingModal = () => {
+      setIsBookingModalOpen(true);
+    };
+
     window.addEventListener("scroll", handleScroll);
+    window.addEventListener("openBookingModal", handleOpenBookingModal);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("openBookingModal", handleOpenBookingModal);
     };
   }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleBookNow = () => {
+    setIsBookingModalOpen(true);
+  };
+
+  const handleSmoothScroll = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    targetId: string,
+  ) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId.replace("#", ""));
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+    setIsMenuOpen(false);
   };
 
   return (
@@ -109,7 +133,12 @@ const Home = () => {
         className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"}`}
       >
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-3">
+            <img
+              src="/kim-events-logo.jpeg"
+              alt="KIM EVENTS Logo"
+              className="w-16 h-16 rounded-full object-cover"
+            />
             <h1 className="text-2xl font-bold text-primary">KIM EVENTS</h1>
           </div>
 
@@ -118,33 +147,37 @@ const Home = () => {
             <a
               href="#home"
               className="text-gray-800 hover:text-primary font-medium"
+              onClick={(e) => handleSmoothScroll(e, "#home")}
             >
               Home
             </a>
             <a
               href="#services"
               className="text-gray-800 hover:text-primary font-medium"
+              onClick={(e) => handleSmoothScroll(e, "#services")}
             >
               Services
             </a>
             <a
               href="#about"
               className="text-gray-800 hover:text-primary font-medium"
+              onClick={(e) => handleSmoothScroll(e, "#about")}
             >
               About
             </a>
             <a
               href="#contact"
               className="text-gray-800 hover:text-primary font-medium"
+              onClick={(e) => handleSmoothScroll(e, "#contact")}
             >
               Contact
             </a>
-            <a
-              href="#book"
+            <button
+              onClick={handleBookNow}
               className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
             >
               Book Now
-            </a>
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -164,38 +197,40 @@ const Home = () => {
               <a
                 href="#home"
                 className="text-gray-800 hover:text-primary font-medium"
-                onClick={toggleMenu}
+                onClick={(e) => handleSmoothScroll(e, "#home")}
               >
                 Home
               </a>
               <a
                 href="#services"
                 className="text-gray-800 hover:text-primary font-medium"
-                onClick={toggleMenu}
+                onClick={(e) => handleSmoothScroll(e, "#services")}
               >
                 Services
               </a>
               <a
                 href="#about"
                 className="text-gray-800 hover:text-primary font-medium"
-                onClick={toggleMenu}
+                onClick={(e) => handleSmoothScroll(e, "#about")}
               >
                 About
               </a>
               <a
                 href="#contact"
                 className="text-gray-800 hover:text-primary font-medium"
-                onClick={toggleMenu}
+                onClick={(e) => handleSmoothScroll(e, "#contact")}
               >
                 Contact
               </a>
-              <a
-                href="#book"
-                className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors text-center"
-                onClick={toggleMenu}
+              <button
+                onClick={() => {
+                  handleBookNow();
+                  setIsMenuOpen(false);
+                }}
+                className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors text-center w-full"
               >
                 Book Now
-              </a>
+              </button>
             </div>
           </div>
         )}
@@ -218,14 +253,14 @@ const Home = () => {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <ServiceSection
+            {services.map((service) => (
+              <ServiceCard
                 key={service.id}
                 title={service.title}
                 description={service.description}
                 imageUrl={service.imageUrl}
-                link={service.link}
-                reverse={index % 2 !== 0}
+                imageAlt={service.title}
+                learnMoreLink={service.link}
               />
             ))}
           </div>
@@ -285,16 +320,32 @@ const Home = () => {
               </p>
             </div>
             <div className="flex flex-col md:flex-row md:space-x-8 space-y-4 md:space-y-0">
-              <a href="#home" className="text-gray-300 hover:text-white">
+              <a
+                href="#home"
+                className="text-gray-300 hover:text-white"
+                onClick={(e) => handleSmoothScroll(e, "#home")}
+              >
                 Home
               </a>
-              <a href="#services" className="text-gray-300 hover:text-white">
+              <a
+                href="#services"
+                className="text-gray-300 hover:text-white"
+                onClick={(e) => handleSmoothScroll(e, "#services")}
+              >
                 Services
               </a>
-              <a href="#about" className="text-gray-300 hover:text-white">
+              <a
+                href="#about"
+                className="text-gray-300 hover:text-white"
+                onClick={(e) => handleSmoothScroll(e, "#about")}
+              >
                 About
               </a>
-              <a href="#contact" className="text-gray-300 hover:text-white">
+              <a
+                href="#contact"
+                className="text-gray-300 hover:text-white"
+                onClick={(e) => handleSmoothScroll(e, "#contact")}
+              >
                 Contact
               </a>
             </div>
@@ -302,10 +353,10 @@ const Home = () => {
           <hr className="border-gray-700 my-6" />
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              &copy; 2023 Kim's Events. Designed with ❤️ by{" "}
+              &copy; 2025 Kim's Events. Designed with ❤️ by{" "}
               <a
-                href="https://www.stakweb.netlify.app"
-                className="text-primary hover:underline"
+                href="https://stakweb.netlify.app/"
+                className="text-white hover:text-sky-400 hover:underline transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -367,6 +418,15 @@ const Home = () => {
           </div>
         </div>
       </footer>
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+      />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
     </div>
   );
 };
